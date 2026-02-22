@@ -35,6 +35,10 @@ const watchlistRoutes = require("./routes/watchlist");
 connectDB();
 
 const app = express();
+
+// Trust proxy - required for express-rate-limit behind Render/Load Balancers
+app.set("trust proxy", 1);
+
 const server = http.createServer(app);
 
 // Socket.io setup
