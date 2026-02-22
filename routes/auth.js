@@ -11,8 +11,8 @@ const sendEmail = require('../utils/sendEmail');
 router.post('/register', [
   body('firstName').trim().notEmpty().withMessage('First name is required'),
   body('lastName').trim().notEmpty().withMessage('Last name is required'),
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
+  body('email').trim().isEmail().withMessage('Valid email is required'),
+  body('password').trim().isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
 ], validate, async (req, res) => {
   try {
     const { firstName, lastName, email, password, phone, role } = req.body;
@@ -64,8 +64,8 @@ router.post('/register', [
 
 // Login
 router.post('/login', [
-  body('email').isEmail().withMessage('Valid email is required'),
-  body('password').notEmpty().withMessage('Password is required'),
+  body('email').trim().isEmail().withMessage('Valid email is required'),
+  body('password').trim().notEmpty().withMessage('Password is required'),
 ], validate, async (req, res) => {
   try {
     const { email, password } = req.body;
