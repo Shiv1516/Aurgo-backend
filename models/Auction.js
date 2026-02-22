@@ -96,7 +96,6 @@ auctionSchema.pre('save', function (next) {
 });
 
 // Indexes
-auctionSchema.index({ slug: 1 });
 auctionSchema.index({ status: 1, startTime: 1 });
 auctionSchema.index({ client: 1 });
 auctionSchema.index({ category: 1 });

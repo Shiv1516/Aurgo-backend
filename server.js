@@ -43,6 +43,7 @@ const io = new Server(server, {
     origin: (origin, callback) => {
       const allowedOrigins = [
         process.env.CLIENT_URL,
+        "https://aurgo.vercel.app",
         "http://localhost:3000",
         "http://localhost:3001",
         "http://localhost:3002",
@@ -69,6 +70,7 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.CLIENT_URL,
+      "https://aurgo.vercel.app",
       "http://localhost:3000",
       "http://localhost:3001",
       "http://localhost:3002",
