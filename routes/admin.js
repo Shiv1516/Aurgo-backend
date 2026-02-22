@@ -173,9 +173,14 @@ router.get('/auctions', async (req, res) => {
   }
 });
 
-router.put('/auctions/:id', async (req, res) => {
+router.put('/auctions/:id', [
+  body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+  body('startTime').optional().isISO8601().withMessage('Valid start time is required'),
+  body('endTime').optional().isISO8601().withMessage('Valid end time is required'),
+], validate, async (req, res) => {
   try {
-    const auction = await Auction.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const auction = await Auction.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+    if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
     await ActivityLog.create({ user: req.user._id, action: 'update_auction', resource: 'Auction', resourceId: auction._id, details: req.body, ipAddress: req.ip });
     res.json({ success: true, data: auction });
   } catch (error) {

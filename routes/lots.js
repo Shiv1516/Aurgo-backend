@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { protect, optionalAuth } = require('../middleware/auth');
+const { body } = require('express-validator');
+const validate = require('../middleware/validate');
 const Lot = require('../models/Lot');
 const Bid = require('../models/Bid');
 const Auction = require('../models/Auction');
@@ -45,8 +47,8 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
 
-    lot.viewCount += 1;
-    await lot.save();
+    // Increment view atomically
+    await Lot.updateOne({ _id: lot._id }, { $inc: { viewCount: 1 } });
 
     res.json({ success: true, data: lot });
   } catch (error) {
@@ -78,7 +80,9 @@ router.get('/:id/bids', async (req, res) => {
 });
 
 // Ask question on a lot
-router.post('/:id/questions', protect, async (req, res) => {
+router.post('/:id/questions', protect, [
+  body('question').trim().notEmpty().withMessage('Question text is required'),
+], validate, async (req, res) => {
   try {
     const lot = await Lot.findById(req.params.id);
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });

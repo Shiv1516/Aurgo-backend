@@ -20,11 +20,29 @@ const lotSchema = new mongoose.Schema({
   certificateOfAuthenticity: { type: String },
 
   // Pricing
-  startingBid: { type: Number, required: [true, 'Starting bid is required'], min: 0 },
-  reservePrice: { type: Number, default: 0 },
-  estimateLow: { type: Number },
-  estimateHigh: { type: Number },
-  bidIncrement: { type: Number, default: 10 },
+  startingBid: { 
+    type: Number, 
+    required: [true, 'Starting bid is required'], 
+    min: [0, 'Starting bid cannot be negative'] 
+  },
+  reservePrice: { 
+    type: Number, 
+    default: 0,
+    min: [0, 'Reserve price cannot be negative']
+  },
+  estimateLow: { 
+    type: Number,
+    min: [0, 'Estimate cannot be negative']
+  },
+  estimateHigh: { 
+    type: Number,
+    min: [0, 'Estimate cannot be negative']
+  },
+  bidIncrement: { 
+    type: Number, 
+    default: 10,
+    min: [1, 'Bid increment must be at least 1']
+  },
 
   // Current bid state
   currentBid: { type: Number, default: 0 },
@@ -44,7 +62,7 @@ const lotSchema = new mongoose.Schema({
   isReserveMet: { type: Boolean, default: false },
 
   // Category & details
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: [true, 'Category is required'] },
   dimensions: { type: String },
   weight: { type: String },
   materials: { type: String },

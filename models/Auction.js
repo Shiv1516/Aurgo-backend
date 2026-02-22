@@ -11,8 +11,8 @@ const auctionSchema = new mongoose.Schema({
   client: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
 
   // Category
-  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category' },
-  tags: [{ type: String }],
+  category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: [true, 'Category is required'] },
+  tags: [{ type: String, trim: true }],
 
   // Images
   coverImage: { type: String },
@@ -35,8 +35,13 @@ const auctionSchema = new mongoose.Schema({
 
   // Auction settings
   auctionType: { type: String, enum: ['timed', 'live'], default: 'timed' },
-  buyersPremium: { type: Number, default: 15 },
-  currency: { type: String, default: 'USD' },
+  buyersPremium: { 
+    type: Number, 
+    default: 15,
+    min: [0, 'Buyers premium cannot be negative'],
+    max: [100, 'Buyers premium cannot exceed 100%']
+  },
+  currency: { type: String, default: 'USD', uppercase: true },
   requiresApproval: { type: Boolean, default: false },
 
   // Location

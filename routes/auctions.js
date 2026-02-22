@@ -18,7 +18,8 @@ router.get('/', async (req, res) => {
 
     // Search
     if (req.query.search) {
-      const regex = new RegExp(req.query.search, 'i');
+      const escapedSearch = req.query.search.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+      const regex = new RegExp(escapedSearch, 'i');
       query = query.find({ $or: [{ title: regex }, { description: regex }, { tags: regex }] });
     }
 
@@ -80,9 +81,8 @@ router.get('/:slug', optionalAuth, async (req, res) => {
 
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
 
-    // Increment view
-    auction.viewCount += 1;
-    await auction.save();
+    // Increment view atomically
+    await Auction.updateOne({ _id: auction._id }, { $inc: { viewCount: 1 } });
 
     // Get lots
     const lots = await Lot.find({ auction: auction._id })

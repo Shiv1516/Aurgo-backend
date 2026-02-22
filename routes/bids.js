@@ -7,11 +7,12 @@ const Bid = require('../models/Bid');
 const Lot = require('../models/Lot');
 const Auction = require('../models/Auction');
 const NotificationService = require('../services/notificationService');
+const { processAutoBids } = require('../sockets/bidding');
 
 // Place bid
 router.post('/', protect, [
-  body('lotId').notEmpty().withMessage('Lot ID is required'),
-  body('amount').isFloat({ min: 0 }).withMessage('Valid bid amount is required'),
+  body('lotId').notEmpty().withMessage('Lot ID is required').isMongoId().withMessage('Invalid Lot ID format'),
+  body('amount').isFloat({ min: 0.01 }).withMessage('Bid amount must be a positive number'),
 ], validate, async (req, res) => {
   try {
     const { lotId, amount, maxAutoBid } = req.body;
@@ -91,6 +92,11 @@ router.post('/', protect, [
       await NotificationService.notifyOutbid(io, previousBidder, bid, lot, auction);
     }
 
+    // Process auto-bids
+    if (io) {
+      await processAutoBids(io, lot, auction, req.user._id);
+    }
+
     res.status(201).json({ success: true, data: bid });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -154,6 +160,18 @@ router.post('/auto-bid', protect, [
     if (bid) {
       bid.maxAutoBid = maxAmount;
       await bid.save();
+    } else {
+      // Create a initial auto-bid record
+      await Bid.create({
+        lot: lotId,
+        auction: lot.auction,
+        bidder: req.user._id,
+        amount: lot.currentBid || lot.startingBid,
+        maxAutoBid: maxAmount,
+        bidType: 'proxy',
+        status: 'active',
+        isWinning: false // It might not be winning yet if it's just setting up auto-bid
+      });
     }
 
     res.json({ success: true, message: 'Auto-bid configured', data: { lotId, maxAmount } });

@@ -27,10 +27,13 @@ const userSchema = new mongoose.Schema(
     password: {
       type: String,
       required: [true, "Password is required"],
-      minlength: 8,
+      minlength: [8, "Password must be at least 8 characters"],
       select: false,
     },
-    phone: { type: String },
+    phone: { 
+      type: String,
+      match: [/^\+?[1-9]\d{1,14}$/, "Please enter a valid phone number"],
+    },
     avatar: { type: String, default: "" },
     role: {
       type: String,
@@ -46,6 +49,15 @@ const userSchema = new mongoose.Schema(
       default: "user",
     },
     isEmailVerified: { type: Boolean, default: false },
+    auctionType: { type: String, enum: ['timed', 'live'], default: 'timed' },
+    buyersPremium: { 
+      type: Number, 
+      default: 15,
+      min: [0, 'Buyers premium cannot be negative'],
+      max: [100, 'Buyers premium cannot exceed 100%']
+    },
+    currency: { type: String, default: 'USD', uppercase: true },
+    requiresApproval: { type: Boolean, default: false },
     isPhoneVerified: { type: Boolean, default: false },
     isActive: { type: Boolean, default: true },
     isSuspended: { type: Boolean, default: false },
@@ -109,6 +121,8 @@ const userSchema = new mongoose.Schema(
       {
         name: String,
         filters: mongoose.Schema.Types.Mixed,
+        category: { type: mongoose.Schema.Types.ObjectId, ref: 'Category', required: [true, 'Category is required'] },
+        tags: [{ type: String, trim: true }],
         createdAt: { type: Date, default: Date.now },
       },
     ],

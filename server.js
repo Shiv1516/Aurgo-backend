@@ -54,18 +54,19 @@ const io = new Server(server, {
 app.set("io", io);
 
 // CORS - must come before helmet so preflight works
+const allowedOrigins = [
+  process.env.CLIENT_URL || "http://localhost:3000",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+];
+
 const corsOptions = {
   origin: function (origin, callback) {
-    const allowedOrigins = [
-      process.env.CLIENT_URL || "http://localhost:3000",
-      "http://localhost:3000",
-      "http://127.0.0.1:3000",
-    ];
     // Allow requests with no origin (mobile apps, curl, Postman)
     if (!origin || allowedOrigins.includes(origin)) {
       callback(null, true);
     } else {
-      callback(null, true); // Allow all in development
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
@@ -79,9 +80,8 @@ const corsOptions = {
   ],
   optionsSuccessStatus: 200,
 };
-app.use(cors(corsOptions));
 
-// Handle preflight for all routes
+app.use(cors(corsOptions));
 app.options("*", cors(corsOptions));
 
 // Security middleware

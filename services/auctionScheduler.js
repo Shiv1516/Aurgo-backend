@@ -31,6 +31,14 @@ const checkAuctionStatus = async (io) => {
       });
 
       await NotificationService.notifyAuctionStarting(io, auction);
+      
+      // Broadcast to global activity room
+      io.emit('activity:global', {
+        type: 'auction_started',
+        title: auction.title,
+        timestamp: now,
+      });
+      
       console.log(`Auction started: ${auction.title}`);
     }
 
@@ -130,10 +138,18 @@ const checkAuctionStatus = async (io) => {
     });
 
     for (const auction of endingSoon) {
-      io.to(`auction:${auction._id}`).emit('auction:endingSoon', {
+      io.to(`auction:${auction._id}`).emit('auction:startingSoon', {
         auctionId: auction._id,
         endTime: auction.endTime,
         minutesLeft: Math.ceil((auction.endTime - now) / 60000),
+      });
+
+      // Broadcast to global activity room
+      io.emit('activity:global', {
+        type: 'auction_ending_soon',
+        title: auction.title,
+        minutesLeft: Math.ceil((auction.endTime - now) / 60000),
+        timestamp: now,
       });
     }
 

@@ -85,7 +85,11 @@ router.post('/auctions', [
   }
 });
 
-router.put('/auctions/:id', async (req, res) => {
+router.put('/auctions/:id', [
+  body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+  body('startTime').optional().isISO8601().withMessage('Valid start time is required'),
+  body('endTime').optional().isISO8601().withMessage('Valid end time is required'),
+], validate, async (req, res) => {
   try {
     const auction = await Auction.findOneAndUpdate(
       { _id: req.params.id, client: req.user._id },
@@ -176,12 +180,17 @@ router.post('/auctions/:auctionId/lots', [
   }
 });
 
-router.put('/lots/:id', async (req, res) => {
+router.put('/lots/:id', [
+  body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
+  body('startingBid').optional().isFloat({ min: 0 }).withMessage('Starting bid cannot be negative'),
+  body('estimateLow').optional().isFloat({ min: 0 }).withMessage('Estimate cannot be negative'),
+  body('estimateHigh').optional().isFloat({ min: 0 }).withMessage('Estimate cannot be negative'),
+], validate, async (req, res) => {
   try {
     const lot = await Lot.findOneAndUpdate(
       { _id: req.params.id, client: req.user._id },
       req.body,
-      { new: true }
+      { new: true, runValidators: true }
     );
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
     res.json({ success: true, data: lot });

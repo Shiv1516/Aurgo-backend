@@ -149,6 +149,15 @@ const setupSocketHandlers = (io) => {
           timestamp: bid.timestamp,
         });
 
+        // Broadcast to global activity room
+        io.emit('activity:global', {
+          type: 'bid',
+          title: lot.title,
+          amount: bid.amount,
+          bidderName: `${socket.user.firstName} ${socket.user.lastName.charAt(0)}.`,
+          timestamp: bid.timestamp,
+        });
+
         // Confirm to bidder
         socket.emit('bid:confirmed', {
           bidId: bid._id,
@@ -213,8 +222,7 @@ async function processAutoBids(io, lot, auction, excludeBidderId) {
     const autoBids = await Bid.find({
       lot: lot._id,
       bidder: { $ne: excludeBidderId },
-      maxAutoBid: { $exists: true, $ne: null },
-      maxAutoBid: { $gt: lot.currentBid },
+      maxAutoBid: { $exists: true, $ne: null, $gt: lot.currentBid },
     }).sort({ maxAutoBid: -1 });
 
     if (autoBids.length === 0) return;
@@ -269,6 +277,16 @@ async function processAutoBids(io, lot, auction, excludeBidderId) {
       isAutoBid: true,
     });
 
+    // Broadcast to global activity room
+    io.emit('activity:global', {
+      type: 'bid',
+      title: lot.title,
+      amount: newBidAmount,
+      bidderName: bidder ? `${bidder.firstName} ${bidder.lastName.charAt(0)}.` : 'Auto-Bidder',
+      timestamp: autoBidEntry.timestamp,
+      isAutoBid: true,
+    });
+
     // Notify outbid user
     if (previousBidder && previousBidder.toString() !== topAutoBid.bidder.toString()) {
       await NotificationService.notifyOutbid(io, previousBidder, autoBidEntry, lot, auction);
@@ -279,4 +297,4 @@ async function processAutoBids(io, lot, auction, excludeBidderId) {
   }
 }
 
-module.exports = { setupSocketHandlers };
+module.exports = { setupSocketHandlers, processAutoBids };

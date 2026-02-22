@@ -3,11 +3,11 @@ const router = express.Router();
 const { protect } = require('../middleware/auth');
 const Order = require('../models/Order');
 const NotificationService = require('../services/notificationService');
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create payment intent
 router.post('/create-intent', protect, async (req, res) => {
   try {
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     const { orderId } = req.body;
 
     const order = await Order.findById(orderId).populate('lot', 'title');
@@ -47,11 +47,6 @@ router.post('/create-intent', protect, async (req, res) => {
 router.post('/confirm', protect, async (req, res) => {
   try {
     const { orderId, paymentIntentId } = req.body;
-
-    const order = await Order.findById(orderId);
-    if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
-
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     const paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
 
     if (paymentIntent.status === 'succeeded') {
@@ -89,7 +84,6 @@ router.post('/confirm', protect, async (req, res) => {
 // Stripe webhook
 router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
   try {
-    const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
     const sig = req.headers['stripe-signature'];
     let event;
 
