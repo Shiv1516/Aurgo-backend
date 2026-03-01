@@ -160,6 +160,15 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/search", searchRoutes);
 app.use("/api/watchlist", watchlistRoutes);
 
+// Root route
+app.get("/", (req, res) => {
+  res.json({
+    message: "Augeo Auction API is running",
+    version: "1.0.0",
+    status: "active",
+  });
+});
+
 // Health check
 app.get("/api/health", (req, res) => {
   res.json({ status: "ok", timestamp: new Date().toISOString() });
