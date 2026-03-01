@@ -10,6 +10,9 @@ const path = require("path");
 const cron = require("node-cron");
 require("dotenv").config();
 
+// Default NODE_ENV to production if not set
+process.env.NODE_ENV = process.env.NODE_ENV || "production";
+
 const connectDB = require("./config/db");
 const { setupSocketHandlers } = require("./sockets/bidding");
 const { checkAuctionStatus } = require("./services/auctionScheduler");
@@ -201,8 +204,9 @@ const PORT = process.env.PORT || 5000;
 
 server.listen(PORT, () => {
   console.log(
-    `Augeo Backend running in ${process.env.NODE_ENV} mode on port ${PORT}`,
+    `Augeo Backend running (${process.env.NODE_ENV}) on port ${PORT}`,
   );
+  console.log(`Live URL: ${process.env.RENDER_EXTERNAL_URL || 'Local'}`);
 });
 
 module.exports = { app, server, io };
