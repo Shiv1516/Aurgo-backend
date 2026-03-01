@@ -50,8 +50,9 @@ const io = new Server(server, {
     origin: (origin, callback) => {
       const allowedOrigins = [
         process.env.CLIENT_URL,
-        "https://aurgo-backend-1.onrender.com/api",
+        "https://aurgo.vercel.app",
         "http://localhost:3000",
+        "http://localhost:3001",
       ].filter(Boolean);
 
       if (
@@ -77,8 +78,9 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.CLIENT_URL,
-      "https://aurgo-backend-1.onrender.com/api",
+      "https://aurgo.vercel.app",
       "http://localhost:3000",
+      "http://localhost:3001",
     ].filter(Boolean);
 
     // Allow requests with no origin (mobile apps, curl, Postman)
