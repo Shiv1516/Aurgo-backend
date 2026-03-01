@@ -50,11 +50,16 @@ const io = new Server(server, {
     origin: (origin, callback) => {
       const allowedOrigins = [
         process.env.CLIENT_URL,
-        "https://aurgo-backend-1.onrender.com",
+        "https://aurgo-backend-1.onrender.com/api",
         "http://localhost:3000",
       ].filter(Boolean);
-      
-      if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+
+      if (
+        !origin ||
+        allowedOrigins.includes(origin) ||
+        origin.startsWith("http://localhost:") ||
+        origin.startsWith("http://127.0.0.1:")
+      ) {
         callback(null, true);
       } else {
         callback(null, true); // Fallback for dev: allow all in dev if origin matches local patterns
@@ -72,12 +77,17 @@ const corsOptions = {
   origin: function (origin, callback) {
     const allowedOrigins = [
       process.env.CLIENT_URL,
-      "https://aurgo-backend-1.onrender.com",
+      "https://aurgo-backend-1.onrender.com/api",
       "http://localhost:3000",
     ].filter(Boolean);
 
     // Allow requests with no origin (mobile apps, curl, Postman)
-    if (!origin || allowedOrigins.includes(origin) || origin.startsWith('http://localhost:') || origin.startsWith('http://127.0.0.1:')) {
+    if (
+      !origin ||
+      allowedOrigins.includes(origin) ||
+      origin.startsWith("http://localhost:") ||
+      origin.startsWith("http://127.0.0.1:")
+    ) {
       callback(null, true);
     } else {
       console.warn(`Blocked by CORS: ${origin}`);
@@ -196,7 +206,7 @@ server.listen(PORT, () => {
   console.log(
     `Augeo Backend running (${process.env.NODE_ENV}) on port ${PORT}`,
   );
-  console.log(`Live URL: ${process.env.RENDER_EXTERNAL_URL || 'Local'}`);
+  console.log(`Live URL: ${process.env.RENDER_EXTERNAL_URL || "Local"}`);
 });
 
 module.exports = { app, server, io };
