@@ -26,7 +26,7 @@ router.get('/dashboard', async (req, res) => {
       Auction.countDocuments(),
       Auction.countDocuments({ status: 'live' }),
       Order.countDocuments({ paymentStatus: 'pending' }),
-      User.countDocuments({ kycStatus: 'pending' }),
+      User.countDocuments({ "kyc.status": 'pending' }),
       User.countDocuments({ role: 'client', clientApproved: false }),
       Order.aggregate([{ $match: { paymentStatus: 'paid' } }, { $group: { _id: null, total: { $sum: '$totalAmount' } } }]),
     ]);
@@ -262,7 +262,7 @@ router.put('/orders/:id/approve-payout', async (req, res) => {
 // ---------- KYC ----------
 router.get('/kyc/pending', async (req, res) => {
   try {
-    const users = await User.find({ kycStatus: 'pending' }).sort('-updatedAt');
+    const users = await User.find({ "kyc.status": 'pending' }).sort('-kyc.submittedAt');
     res.json({ success: true, data: users });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -271,7 +271,7 @@ router.get('/kyc/pending', async (req, res) => {
 
 router.put('/kyc/:userId/approve', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, { kycStatus: 'approved' }, { new: true });
+    const user = await User.findByIdAndUpdate(req.params.userId, { "kyc.status": 'verified' }, { new: true });
     const io = req.app.get('io');
     if (io) {
       await NotificationService.create({ recipient: user._id, type: 'kyc_approved', title: 'KYC Approved', message: 'Your identity verification has been approved.', priority: 'normal' });
@@ -284,7 +284,14 @@ router.put('/kyc/:userId/approve', async (req, res) => {
 
 router.put('/kyc/:userId/reject', async (req, res) => {
   try {
-    const user = await User.findByIdAndUpdate(req.params.userId, { kycStatus: 'rejected' }, { new: true });
+    const user = await User.findByIdAndUpdate(
+      req.params.userId, 
+      { 
+        "kyc.status": 'rejected',
+        "kyc.rejectionReason": req.body.reason
+      }, 
+      { new: true }
+    );
     const io = req.app.get('io');
     if (io) {
       await NotificationService.create({ recipient: user._id, type: 'kyc_rejected', title: 'KYC Rejected', message: `Your identity verification was rejected. Reason: ${req.body.reason}`, priority: 'high' });

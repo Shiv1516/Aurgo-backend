@@ -137,6 +137,20 @@ class NotificationService {
       io.to(`user:${watcher.user}`).emit('notification', notif);
     }
   }
+
+  static async notifyPaymentConfirmed(io, recipient, order) {
+    const notif = await this.create({
+      recipient,
+      type: 'payment_confirmed',
+      title: 'Payment Confirmed',
+      message: `Your payment of $${order.totalAmount.toLocaleString()} for order ${order.orderNumber} has been confirmed.`,
+      order: order._id,
+      actionUrl: `/dashboard/orders/${order._id}`,
+      priority: 'high',
+    });
+    io.to(`user:${recipient}`).emit('notification', notif);
+    return notif;
+  }
 }
 
 module.exports = NotificationService;

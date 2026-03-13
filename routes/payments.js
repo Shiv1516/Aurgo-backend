@@ -85,15 +85,7 @@ router.post('/confirm', protect, async (req, res) => {
       // Send payment confirmation notification
       const io = req.app.get('io');
       if (io) {
-        await NotificationService.create({
-          recipient: order.buyer,
-          type: 'payment_confirmed',
-          title: 'Payment Confirmed',
-          message: `Your payment of $${order.totalAmount.toLocaleString()} for order ${order.orderNumber} has been confirmed.`,
-          order: order._id,
-          actionUrl: `/dashboard/orders/${order._id}`,
-          priority: 'high',
-        });
+        await NotificationService.notifyPaymentConfirmed(io, order.buyer, order);
       }
 
       res.json({ success: true, data: order });

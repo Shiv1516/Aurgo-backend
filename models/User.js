@@ -64,18 +64,22 @@ const userSchema = new mongoose.Schema(
     suspensionReason: { type: String },
 
     // KYC
-    kycStatus: {
-      type: String,
-      enum: ["none", "pending", "approved", "rejected"],
-      default: "none",
-    },
-    kycDocuments: [
-      {
-        type: { type: String },
-        url: String,
-        uploadedAt: { type: Date, default: Date.now },
+    kyc: {
+      status: {
+        type: String,
+        enum: ["none", "pending", "verified", "rejected"],
+        default: "none",
       },
-    ],
+      documents: [
+        {
+          type: { type: String },
+          url: String,
+          uploadedAt: { type: Date, default: Date.now },
+        },
+      ],
+      rejectionReason: { type: String },
+      submittedAt: { type: Date },
+    },
 
     // Addresses
     addresses: [

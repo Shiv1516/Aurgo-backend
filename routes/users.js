@@ -120,12 +120,15 @@ router.post(
         type: req.body.documentType || "id",
         url: `/uploads/documents/${f.filename}`,
       }));
-      user.kycDocuments.push(...documents);
-      user.kycStatus = "pending";
+      
+      user.kyc.documents.push(...documents);
+      user.kyc.status = "pending";
+      user.kyc.submittedAt = new Date();
+      
       await user.save();
       res.json({
         success: true,
-        data: { kycStatus: user.kycStatus, documents: user.kycDocuments },
+        data: user.kyc,
       });
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });

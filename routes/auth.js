@@ -119,7 +119,7 @@ router.post('/login', [
         role: user.role,
         avatar: user.avatar,
         isEmailVerified: user.isEmailVerified,
-        kycStatus: user.kycStatus,
+        kycStatus: user.kyc?.status,
         companyName: user.companyName,
         clientApproved: user.clientApproved,
       },
