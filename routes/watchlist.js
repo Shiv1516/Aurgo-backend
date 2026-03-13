@@ -21,7 +21,7 @@ router.get('/', protect, async (req, res) => {
 
     res.json({ success: true, data: watchlist });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -53,7 +53,7 @@ router.post('/', protect, async (req, res) => {
 
     res.status(201).json({ success: true, data: watchItem });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -66,7 +66,7 @@ router.get('/check/:auctionId', protect, async (req, res) => {
     });
     res.json({ success: true, isWatching: !!item, data: item });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -82,7 +82,7 @@ router.delete('/:id', protect, async (req, res) => {
 
     res.json({ success: true, message: 'Removed from watchlist' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

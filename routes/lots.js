@@ -31,7 +31,7 @@ router.get('/auction/:auctionId', async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -52,7 +52,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 
     res.json({ success: true, data: lot });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -75,7 +75,7 @@ router.get('/:id/bids', async (req, res) => {
 
     res.json({ success: true, data: sanitizedBids });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -95,7 +95,7 @@ router.post('/:id/questions', protect, [
 
     res.status(201).json({ success: true, data: lot.questions });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

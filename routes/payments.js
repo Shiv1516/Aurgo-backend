@@ -49,7 +49,7 @@ router.post('/create-intent', protect, async (req, res) => {
       paymentIntentId: paymentIntent.id,
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -95,7 +95,7 @@ router.post('/confirm', protect, async (req, res) => {
       res.status(400).json({ success: false, error: 'Payment not successful', status: 'failed' });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -137,7 +137,7 @@ router.post('/webhook', express.raw({ type: 'application/json' }), async (req, r
 
     res.json({ received: true });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

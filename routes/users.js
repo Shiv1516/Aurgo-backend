@@ -16,7 +16,7 @@ router.put(
     body("phone").optional().trim().matches(/^\+?[1-9]\d{1,14}$/).withMessage("Please enter a valid phone number"),
   ],
   validate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const { firstName, lastName, phone } = req.body;
       const user = await User.findByIdAndUpdate(
@@ -26,7 +26,7 @@ router.put(
       );
       res.json({ success: true, data: user });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   },
 );
@@ -44,7 +44,7 @@ router.put("/avatar", protect, upload.single("avatar"), async (req, res) => {
     );
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -59,7 +59,7 @@ router.post(
     body("country").trim().notEmpty().withMessage("Country is required"),
   ],
   validate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const user = await User.findById(req.user._id);
       if (req.body.isDefault) {
@@ -71,7 +71,7 @@ router.post(
       await user.save();
       res.json({ success: true, data: user.addresses });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   },
 );
@@ -94,7 +94,7 @@ router.put("/addresses/:id", protect, async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.addresses });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -105,7 +105,7 @@ router.delete("/addresses/:id", protect, async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.addresses });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -113,7 +113,7 @@ router.post(
   "/kyc",
   protect,
   upload.array("kycDocuments", 3),
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const user = await User.findById(req.user._id);
       const documents = req.files.map((f) => ({
@@ -131,7 +131,7 @@ router.post(
         data: user.kyc,
       });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   },
 );
@@ -141,7 +141,7 @@ router.post(
   protect,
   [body("subject").notEmpty(), body("description").notEmpty()],
   validate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const ticket = await SupportTicket.create({
         user: req.user._id,
@@ -154,7 +154,7 @@ router.post(
       });
       res.status(201).json({ success: true, data: ticket });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   },
 );
@@ -167,7 +167,7 @@ router.put(
     body("newPassword").isLength({ min: 8 }),
   ],
   validate,
-  async (req, res) => {
+  async (req, res, next) => {
     try {
       const user = await User.findById(req.user._id).select("+password");
       const isMatch = await user.matchPassword(req.body.currentPassword);
@@ -180,7 +180,7 @@ router.put(
       await user.save();
       res.json({ success: true, message: "Password updated" });
     } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
+      next(error);
     }
   },
 );
@@ -192,7 +192,7 @@ router.post("/saved-searches", protect, async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.savedSearches });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -203,7 +203,7 @@ router.delete("/saved-searches/:id", protect, async (req, res) => {
     await user.save();
     res.json({ success: true, data: user.savedSearches });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

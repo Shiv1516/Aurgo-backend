@@ -180,50 +180,8 @@ app.get("/api/health", (req, res) => {
 });
 
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error("Global Error Caught:", err);
-
-  let error = { ...err };
-  error.message = err.message;
-  let statusCode = err.statusCode || 500;
-  let errorMessage = err.message || "Internal Server Error";
-
-  // Mongoose bad ObjectId
-  if (err.name === 'CastError') {
-    errorMessage = `Resource not found. Invalid ID format.`;
-    statusCode = 404;
-  }
-
-  // Mongoose duplicate key
-  if (err.code === 11000) {
-    const field = Object.keys(err.keyValue)[0];
-    errorMessage = `Duplicate field value entered for ${field}. Please use another value.`;
-    statusCode = 400;
-  }
-
-  // Mongoose validation error
-  if (err.name === 'ValidationError') {
-    const messages = Object.values(err.errors).map(val => val.message);
-    errorMessage = `Invalid input data. ${messages.join('. ')}`;
-    statusCode = 400;
-  }
-  
-  // JWT errors
-  if (err.name === 'JsonWebTokenError') {
-    errorMessage = 'Invalid token. Please log in again.';
-    statusCode = 401;
-  }
-  if (err.name === 'TokenExpiredError') {
-    errorMessage = 'Your token has expired. Please log in again.';
-    statusCode = 401;
-  }
-
-  res.status(statusCode).json({
-    success: false,
-    error: errorMessage,
-    ...(process.env.NODE_ENV === "development" && { stack: err.stack }),
-  });
-});
+const errorHandler = require("./middleware/error");
+app.use(errorHandler);
 
 // 404 handler
 app.use((req, res) => {

@@ -25,7 +25,7 @@ router.get('/', protect, async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -35,7 +35,7 @@ router.get('/unread-count', protect, async (req, res) => {
     const count = await Notification.countDocuments({ recipient: req.user._id, isRead: false });
     res.json({ success: true, count });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -50,7 +50,7 @@ router.put('/:id/read', protect, async (req, res) => {
     if (!notification) return res.status(404).json({ success: false, error: 'Notification not found' });
     res.json({ success: true, data: notification });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -63,7 +63,7 @@ router.put('/read-all', protect, async (req, res) => {
     );
     res.json({ success: true, message: 'All notifications marked as read' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -73,7 +73,7 @@ router.delete('/:id', protect, async (req, res) => {
     await Notification.findOneAndDelete({ _id: req.params.id, recipient: req.user._id });
     res.json({ success: true, message: 'Notification deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

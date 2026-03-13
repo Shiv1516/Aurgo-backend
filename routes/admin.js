@@ -50,7 +50,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -75,7 +75,7 @@ router.get('/users', async (req, res) => {
 
     res.json({ success: true, data: users, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -85,7 +85,7 @@ router.get('/users/:id', async (req, res) => {
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -96,7 +96,7 @@ router.put('/users/:id', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'update_user', resource: 'User', resourceId: user._id, details: req.body, ipAddress: req.ip });
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -106,7 +106,7 @@ router.put('/users/:id/suspend', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'suspend_user', resource: 'User', resourceId: user._id, details: { reason: req.body.reason }, ipAddress: req.ip });
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -116,7 +116,7 @@ router.put('/users/:id/activate', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'activate_user', resource: 'User', resourceId: user._id, ipAddress: req.ip });
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -126,7 +126,7 @@ router.get('/clients/pending', async (req, res) => {
     const clients = await User.find({ role: 'client', clientApproved: false }).sort('-createdAt');
     res.json({ success: true, data: clients });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -140,7 +140,7 @@ router.put('/clients/:id/approve', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'approve_client', resource: 'User', resourceId: client._id, ipAddress: req.ip });
     res.json({ success: true, data: client });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -149,7 +149,7 @@ router.put('/clients/:id/reject', async (req, res) => {
     const client = await User.findByIdAndUpdate(req.params.id, { clientApproved: false, suspensionReason: req.body.reason }, { new: true });
     res.json({ success: true, data: client });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -169,7 +169,7 @@ router.get('/auctions', async (req, res) => {
 
     res.json({ success: true, data: auctions, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -184,7 +184,7 @@ router.put('/auctions/:id', [
     await ActivityLog.create({ user: req.user._id, action: 'update_auction', resource: 'Auction', resourceId: auction._id, details: req.body, ipAddress: req.ip });
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -194,7 +194,7 @@ router.put('/auctions/:id/cancel', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'cancel_auction', resource: 'Auction', resourceId: auction._id, details: { reason: req.body.reason }, ipAddress: req.ip });
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -204,7 +204,7 @@ router.put('/auctions/:id/suspend', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'suspend_auction', resource: 'Auction', resourceId: auction._id, details: { reason: req.body.reason }, ipAddress: req.ip });
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -229,7 +229,7 @@ router.get('/orders', async (req, res) => {
 
     res.json({ success: true, data: orders, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -245,7 +245,7 @@ router.post('/orders/:id/refund', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'refund_order', resource: 'Order', resourceId: order._id, details: { amount: req.body.amount }, ipAddress: req.ip });
     res.json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -255,7 +255,7 @@ router.put('/orders/:id/approve-payout', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'approve_payout', resource: 'Order', resourceId: order._id, ipAddress: req.ip });
     res.json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -265,7 +265,7 @@ router.get('/kyc/pending', async (req, res) => {
     const users = await User.find({ "kyc.status": 'pending' }).sort('-kyc.submittedAt');
     res.json({ success: true, data: users });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -278,7 +278,7 @@ router.put('/kyc/:userId/approve', async (req, res) => {
     }
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -298,7 +298,7 @@ router.put('/kyc/:userId/reject', async (req, res) => {
     }
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -308,7 +308,7 @@ router.get('/categories', async (req, res) => {
     const categories = await Category.find().sort('displayOrder name');
     res.json({ success: true, data: categories });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -317,7 +317,7 @@ router.post('/categories', [body('name').notEmpty()], validate, async (req, res)
     const category = await Category.create(req.body);
     res.status(201).json({ success: true, data: category });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -326,7 +326,7 @@ router.put('/categories/:id', async (req, res) => {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, data: category });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -335,7 +335,7 @@ router.delete('/categories/:id', async (req, res) => {
     await Category.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Category deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -345,7 +345,7 @@ router.get('/pages', async (req, res) => {
     const pages = await Page.find().sort('-updatedAt');
     res.json({ success: true, data: pages });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -354,7 +354,7 @@ router.post('/pages', [body('title').notEmpty(), body('content').notEmpty()], va
     const page = await Page.create({ ...req.body, lastEditedBy: req.user._id });
     res.status(201).json({ success: true, data: page });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -363,7 +363,7 @@ router.put('/pages/:id', async (req, res) => {
     const page = await Page.findByIdAndUpdate(req.params.id, { ...req.body, lastEditedBy: req.user._id }, { new: true });
     res.json({ success: true, data: page });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -372,7 +372,7 @@ router.delete('/pages/:id', async (req, res) => {
     await Page.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Page deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -384,7 +384,7 @@ router.get('/settings', async (req, res) => {
     settings.forEach(s => { settingsMap[s.key] = s.value; });
     res.json({ success: true, data: settingsMap });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -401,7 +401,7 @@ router.put('/settings', async (req, res) => {
     await ActivityLog.create({ user: req.user._id, action: 'update_settings', resource: 'Setting', details: updates, ipAddress: req.ip });
     res.json({ success: true, message: 'Settings updated' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -419,7 +419,7 @@ router.get('/activity-logs', async (req, res) => {
 
     res.json({ success: true, data: logs, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -451,7 +451,7 @@ router.get('/reports', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

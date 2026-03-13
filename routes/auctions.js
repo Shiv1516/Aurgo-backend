@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -68,7 +68,7 @@ router.get('/featured', async (req, res) => {
 
     res.json({ success: true, data: auctions });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -92,7 +92,7 @@ router.get('/:slug', optionalAuth, async (req, res) => {
 
     res.json({ success: true, data: { ...auction.toObject(), lots } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -123,7 +123,7 @@ router.get('/category/:categorySlug', async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

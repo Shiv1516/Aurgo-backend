@@ -99,7 +99,7 @@ router.post('/', protect, [
 
     res.status(201).json({ success: true, data: bid });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -127,7 +127,7 @@ router.get('/my-bids', protect, async (req, res) => {
       pagination: { page, limit, total, pages: Math.ceil(total / limit) },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -141,7 +141,7 @@ router.get('/active', protect, async (req, res) => {
 
     res.json({ success: true, data: bids });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -176,7 +176,7 @@ router.post('/auto-bid', protect, [
 
     res.json({ success: true, message: 'Auto-bid configured', data: { lotId, maxAmount } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

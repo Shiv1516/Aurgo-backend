@@ -58,7 +58,7 @@ router.post('/register', [
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -125,7 +125,7 @@ router.post('/login', [
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -161,7 +161,7 @@ router.get('/verify-email/:token', async (req, res) => {
 
     res.json({ success: true, message: 'Email verified successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -192,7 +192,7 @@ router.post('/forgot-password', [
 
     res.json({ success: true, message: 'If the email exists, a reset link has been sent' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -218,7 +218,7 @@ router.put('/reset-password/:token', [
 
     res.json({ success: true, message: 'Password reset successful' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

@@ -84,7 +84,7 @@ router.get('/', protect, authorize('admin', 'superadmin', 'client', 'client_mana
 
     res.json({ success: true, data: report, type: type || 'summary' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

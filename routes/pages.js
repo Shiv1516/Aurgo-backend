@@ -9,7 +9,7 @@ router.get('/:slug', async (req, res) => {
     if (!page) return res.status(404).json({ success: false, error: 'Page not found' });
     res.json({ success: true, data: page });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 

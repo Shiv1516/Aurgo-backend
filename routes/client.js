@@ -38,7 +38,7 @@ router.get('/dashboard', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -57,7 +57,7 @@ router.get('/auctions', async (req, res) => {
 
     res.json({ success: true, data: auctions, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -67,7 +67,7 @@ router.get('/auctions/:id', async (req, res) => {
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -81,7 +81,7 @@ router.post('/auctions', [
     const auction = await Auction.create({ ...req.body, client: req.user._id });
     res.status(201).json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -99,7 +99,7 @@ router.put('/auctions/:id', [
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -118,7 +118,7 @@ router.put('/auctions/:id/publish', async (req, res) => {
 
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -131,7 +131,7 @@ router.put('/auctions/:id/unpublish', async (req, res) => {
     );
     res.json({ success: true, data: auction });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -147,7 +147,7 @@ router.get('/auctions/:auctionId/lots', async (req, res) => {
 
     res.json({ success: true, data: lots });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -176,7 +176,7 @@ router.post('/auctions/:auctionId/lots', [
 
     res.status(201).json({ success: true, data: lot });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -195,7 +195,7 @@ router.put('/lots/:id', [
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
     res.json({ success: true, data: lot });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -213,7 +213,7 @@ router.delete('/lots/:id', async (req, res) => {
 
     res.json({ success: true, message: 'Lot deleted' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -234,7 +234,7 @@ router.post('/lots/:id/images', upload.array('images', 10), async (req, res) => 
 
     res.json({ success: true, data: lot.images });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -253,7 +253,7 @@ router.put('/lots/:lotId/questions/:questionId/answer', async (req, res) => {
 
     res.json({ success: true, data: lot.questions });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -277,7 +277,7 @@ router.get('/orders', async (req, res) => {
 
     res.json({ success: true, data: orders, pagination: { page, limit, total, pages: Math.ceil(total / limit) } });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -314,7 +314,7 @@ router.put('/orders/:id', async (req, res) => {
 
     res.json({ success: true, data: order });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -350,7 +350,7 @@ router.get('/reports', async (req, res) => {
       },
     });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -361,7 +361,7 @@ router.put('/profile', async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user._id, { companyName, companyDescription, companyWebsite }, { new: true });
     res.json({ success: true, data: user });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
@@ -370,7 +370,7 @@ router.put('/bank-details', async (req, res) => {
     const user = await User.findByIdAndUpdate(req.user._id, { bankDetails: req.body }, { new: true });
     res.json({ success: true, data: user.bankDetails });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 });
 
