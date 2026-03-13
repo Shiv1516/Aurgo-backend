@@ -8,7 +8,7 @@ const Bid = require('../models/Bid');
 const Auction = require('../models/Auction');
 
 // Get lots by auction
-router.get('/auction/:auctionId', async (req, res) => {
+router.get('/auction/:auctionId', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -36,7 +36,7 @@ router.get('/auction/:auctionId', async (req, res) => {
 });
 
 // Get lot by ID
-router.get('/:id', optionalAuth, async (req, res) => {
+router.get('/:id', optionalAuth, async (req, res, next) => {
   try {
     const lot = await Lot.findById(req.params.id)
       .populate('auction', 'title slug status endTime buyersPremium client')
@@ -57,7 +57,7 @@ router.get('/:id', optionalAuth, async (req, res) => {
 });
 
 // Get bid history for a lot
-router.get('/:id/bids', async (req, res) => {
+router.get('/:id/bids', async (req, res, next) => {
   try {
     const bids = await Bid.find({ lot: req.params.id })
       .sort({ timestamp: -1 })
@@ -82,7 +82,7 @@ router.get('/:id/bids', async (req, res) => {
 // Ask question on a lot
 router.post('/:id/questions', protect, [
   body('question').trim().notEmpty().withMessage('Question text is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const lot = await Lot.findById(req.params.id);
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });

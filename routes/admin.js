@@ -19,7 +19,7 @@ const NotificationService = require('../services/notificationService');
 router.use(protect, authorize('admin', 'superadmin'));
 
 // ---------- DASHBOARD ----------
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', async (req, res, next) => {
   try {
     const [totalUsers, totalAuctions, liveAuctions, pendingOrders, pendingKYC, pendingClients, totalRevenue] = await Promise.all([
       User.countDocuments(),
@@ -55,7 +55,7 @@ router.get('/dashboard', async (req, res) => {
 });
 
 // ---------- USER MANAGEMENT ----------
-router.get('/users', async (req, res) => {
+router.get('/users', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -79,7 +79,7 @@ router.get('/users', async (req, res) => {
   }
 });
 
-router.get('/users/:id', async (req, res) => {
+router.get('/users/:id', async (req, res, next) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ success: false, error: 'User not found' });
@@ -89,7 +89,7 @@ router.get('/users/:id', async (req, res) => {
   }
 });
 
-router.put('/users/:id', async (req, res) => {
+router.put('/users/:id', async (req, res, next) => {
   try {
     const { role, isActive, commissionRate } = req.body;
     const user = await User.findByIdAndUpdate(req.params.id, { role, isActive, commissionRate }, { new: true });
@@ -100,7 +100,7 @@ router.put('/users/:id', async (req, res) => {
   }
 });
 
-router.put('/users/:id/suspend', async (req, res) => {
+router.put('/users/:id/suspend', async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { isSuspended: true, suspensionReason: req.body.reason }, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'suspend_user', resource: 'User', resourceId: user._id, details: { reason: req.body.reason }, ipAddress: req.ip });
@@ -110,7 +110,7 @@ router.put('/users/:id/suspend', async (req, res) => {
   }
 });
 
-router.put('/users/:id/activate', async (req, res) => {
+router.put('/users/:id/activate', async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.id, { isSuspended: false, suspensionReason: '', isActive: true }, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'activate_user', resource: 'User', resourceId: user._id, ipAddress: req.ip });
@@ -121,7 +121,7 @@ router.put('/users/:id/activate', async (req, res) => {
 });
 
 // ---------- CLIENT APPROVAL ----------
-router.get('/clients/pending', async (req, res) => {
+router.get('/clients/pending', async (req, res, next) => {
   try {
     const clients = await User.find({ role: 'client', clientApproved: false }).sort('-createdAt');
     res.json({ success: true, data: clients });
@@ -130,7 +130,7 @@ router.get('/clients/pending', async (req, res) => {
   }
 });
 
-router.put('/clients/:id/approve', async (req, res) => {
+router.put('/clients/:id/approve', async (req, res, next) => {
   try {
     const client = await User.findByIdAndUpdate(req.params.id, { clientApproved: true }, { new: true });
     const io = req.app.get('io');
@@ -144,7 +144,7 @@ router.put('/clients/:id/approve', async (req, res) => {
   }
 });
 
-router.put('/clients/:id/reject', async (req, res) => {
+router.put('/clients/:id/reject', async (req, res, next) => {
   try {
     const client = await User.findByIdAndUpdate(req.params.id, { clientApproved: false, suspensionReason: req.body.reason }, { new: true });
     res.json({ success: true, data: client });
@@ -154,7 +154,7 @@ router.put('/clients/:id/reject', async (req, res) => {
 });
 
 // ---------- AUCTION OVERSIGHT ----------
-router.get('/auctions', async (req, res) => {
+router.get('/auctions', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -177,7 +177,7 @@ router.put('/auctions/:id', [
   body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
   body('startTime').optional().isISO8601().withMessage('Valid start time is required'),
   body('endTime').optional().isISO8601().withMessage('Valid end time is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const auction = await Auction.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
@@ -188,7 +188,7 @@ router.put('/auctions/:id', [
   }
 });
 
-router.put('/auctions/:id/cancel', async (req, res) => {
+router.put('/auctions/:id/cancel', async (req, res, next) => {
   try {
     const auction = await Auction.findByIdAndUpdate(req.params.id, { status: 'cancelled', adminNotes: req.body.reason }, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'cancel_auction', resource: 'Auction', resourceId: auction._id, details: { reason: req.body.reason }, ipAddress: req.ip });
@@ -198,7 +198,7 @@ router.put('/auctions/:id/cancel', async (req, res) => {
   }
 });
 
-router.put('/auctions/:id/suspend', async (req, res) => {
+router.put('/auctions/:id/suspend', async (req, res, next) => {
   try {
     const auction = await Auction.findByIdAndUpdate(req.params.id, { status: 'suspended', suspendedBy: req.user._id, suspensionReason: req.body.reason }, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'suspend_auction', resource: 'Auction', resourceId: auction._id, details: { reason: req.body.reason }, ipAddress: req.ip });
@@ -209,7 +209,7 @@ router.put('/auctions/:id/suspend', async (req, res) => {
 });
 
 // ---------- ORDERS & FINANCIAL ----------
-router.get('/orders', async (req, res) => {
+router.get('/orders', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -233,7 +233,7 @@ router.get('/orders', async (req, res) => {
   }
 });
 
-router.post('/orders/:id/refund', async (req, res) => {
+router.post('/orders/:id/refund', async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, error: 'Order not found' });
@@ -249,7 +249,7 @@ router.post('/orders/:id/refund', async (req, res) => {
   }
 });
 
-router.put('/orders/:id/approve-payout', async (req, res) => {
+router.put('/orders/:id/approve-payout', async (req, res, next) => {
   try {
     const order = await Order.findByIdAndUpdate(req.params.id, { payoutStatus: 'approved', payoutDate: new Date() }, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'approve_payout', resource: 'Order', resourceId: order._id, ipAddress: req.ip });
@@ -260,7 +260,7 @@ router.put('/orders/:id/approve-payout', async (req, res) => {
 });
 
 // ---------- KYC ----------
-router.get('/kyc/pending', async (req, res) => {
+router.get('/kyc/pending', async (req, res, next) => {
   try {
     const users = await User.find({ "kyc.status": 'pending' }).sort('-kyc.submittedAt');
     res.json({ success: true, data: users });
@@ -269,7 +269,7 @@ router.get('/kyc/pending', async (req, res) => {
   }
 });
 
-router.put('/kyc/:userId/approve', async (req, res) => {
+router.put('/kyc/:userId/approve', async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(req.params.userId, { "kyc.status": 'verified' }, { new: true });
     const io = req.app.get('io');
@@ -282,7 +282,7 @@ router.put('/kyc/:userId/approve', async (req, res) => {
   }
 });
 
-router.put('/kyc/:userId/reject', async (req, res) => {
+router.put('/kyc/:userId/reject', async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(
       req.params.userId, 
@@ -303,7 +303,7 @@ router.put('/kyc/:userId/reject', async (req, res) => {
 });
 
 // ---------- CATEGORIES ----------
-router.get('/categories', async (req, res) => {
+router.get('/categories', async (req, res, next) => {
   try {
     const categories = await Category.find().sort('displayOrder name');
     res.json({ success: true, data: categories });
@@ -312,7 +312,7 @@ router.get('/categories', async (req, res) => {
   }
 });
 
-router.post('/categories', [body('name').notEmpty()], validate, async (req, res) => {
+router.post('/categories', [body('name').notEmpty()], validate, async (req, res, next) => {
   try {
     const category = await Category.create(req.body);
     res.status(201).json({ success: true, data: category });
@@ -321,7 +321,7 @@ router.post('/categories', [body('name').notEmpty()], validate, async (req, res)
   }
 });
 
-router.put('/categories/:id', async (req, res) => {
+router.put('/categories/:id', async (req, res, next) => {
   try {
     const category = await Category.findByIdAndUpdate(req.params.id, req.body, { new: true });
     res.json({ success: true, data: category });
@@ -330,7 +330,7 @@ router.put('/categories/:id', async (req, res) => {
   }
 });
 
-router.delete('/categories/:id', async (req, res) => {
+router.delete('/categories/:id', async (req, res, next) => {
   try {
     await Category.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Category deleted' });
@@ -340,7 +340,7 @@ router.delete('/categories/:id', async (req, res) => {
 });
 
 // ---------- PAGES / CMS ----------
-router.get('/pages', async (req, res) => {
+router.get('/pages', async (req, res, next) => {
   try {
     const pages = await Page.find().sort('-updatedAt');
     res.json({ success: true, data: pages });
@@ -349,7 +349,7 @@ router.get('/pages', async (req, res) => {
   }
 });
 
-router.post('/pages', [body('title').notEmpty(), body('content').notEmpty()], validate, async (req, res) => {
+router.post('/pages', [body('title').notEmpty(), body('content').notEmpty()], validate, async (req, res, next) => {
   try {
     const page = await Page.create({ ...req.body, lastEditedBy: req.user._id });
     res.status(201).json({ success: true, data: page });
@@ -358,7 +358,7 @@ router.post('/pages', [body('title').notEmpty(), body('content').notEmpty()], va
   }
 });
 
-router.put('/pages/:id', async (req, res) => {
+router.put('/pages/:id', async (req, res, next) => {
   try {
     const page = await Page.findByIdAndUpdate(req.params.id, { ...req.body, lastEditedBy: req.user._id }, { new: true });
     res.json({ success: true, data: page });
@@ -367,7 +367,7 @@ router.put('/pages/:id', async (req, res) => {
   }
 });
 
-router.delete('/pages/:id', async (req, res) => {
+router.delete('/pages/:id', async (req, res, next) => {
   try {
     await Page.findByIdAndDelete(req.params.id);
     res.json({ success: true, message: 'Page deleted' });
@@ -377,7 +377,7 @@ router.delete('/pages/:id', async (req, res) => {
 });
 
 // ---------- SETTINGS ----------
-router.get('/settings', async (req, res) => {
+router.get('/settings', async (req, res, next) => {
   try {
     const settings = await Setting.find();
     const settingsMap = {};
@@ -388,7 +388,7 @@ router.get('/settings', async (req, res) => {
   }
 });
 
-router.put('/settings', async (req, res) => {
+router.put('/settings', async (req, res, next) => {
   try {
     const updates = req.body;
     for (const [key, value] of Object.entries(updates)) {
@@ -406,7 +406,7 @@ router.put('/settings', async (req, res) => {
 });
 
 // ---------- ACTIVITY LOGS ----------
-router.get('/activity-logs', async (req, res) => {
+router.get('/activity-logs', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 50;
@@ -424,7 +424,7 @@ router.get('/activity-logs', async (req, res) => {
 });
 
 // ---------- REPORTS ----------
-router.get('/reports', async (req, res) => {
+router.get('/reports', async (req, res, next) => {
   try {
     const { startDate, endDate } = req.query;
     const dateFilter = {};

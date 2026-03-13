@@ -6,7 +6,7 @@ const NotificationService = require('../services/notificationService');
 const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY);
 
 // Create payment intent
-router.post('/create-intent', protect, async (req, res) => {
+router.post('/create-intent', protect, async (req, res, next) => {
   try {
     const { orderId } = req.body;
 
@@ -54,7 +54,7 @@ router.post('/create-intent', protect, async (req, res) => {
 });
 
 // Confirm payment
-router.post('/confirm', protect, async (req, res) => {
+router.post('/confirm', protect, async (req, res, next) => {
   try {
     const { orderId, paymentIntentId } = req.body;
     
@@ -100,7 +100,7 @@ router.post('/confirm', protect, async (req, res) => {
 });
 
 // Stripe webhook
-router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res) => {
+router.post('/webhook', express.raw({ type: 'application/json' }), async (req, res, next) => {
   try {
     const sig = req.headers['stripe-signature'];
     let event;

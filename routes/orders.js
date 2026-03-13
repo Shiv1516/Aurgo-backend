@@ -4,7 +4,7 @@ const { protect } = require('../middleware/auth');
 const Order = require('../models/Order');
 
 // Get user's orders
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -34,7 +34,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // Get order by ID
-router.get('/:id', protect, async (req, res) => {
+router.get('/:id', protect, async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate({ path: 'lot', select: 'title lotNumber images description' })
@@ -56,7 +56,7 @@ router.get('/:id', protect, async (req, res) => {
 });
 
 // Get invoice
-router.get('/:id/invoice', protect, async (req, res) => {
+router.get('/:id/invoice', protect, async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id)
       .populate('lot', 'title lotNumber')
@@ -77,7 +77,7 @@ router.get('/:id/invoice', protect, async (req, res) => {
 });
 
 // Update shipping address on order
-router.put('/:id/shipping-address', protect, async (req, res) => {
+router.put('/:id/shipping-address', protect, async (req, res, next) => {
   try {
     const order = await Order.findById(req.params.id);
     if (!order) return res.status(404).json({ success: false, error: 'Order not found' });

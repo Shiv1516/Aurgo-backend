@@ -14,7 +14,7 @@ const Order = require('../models/Order');
 router.use(protect, authorize('client', 'client_staff', 'client_editor', 'client_manager'));
 
 // ---------- DASHBOARD ----------
-router.get('/dashboard', async (req, res) => {
+router.get('/dashboard', async (req, res, next) => {
   try {
     const clientId = req.user._id;
     const [totalAuctions, activeLots, totalRevenue, pendingOrders] = await Promise.all([
@@ -43,7 +43,7 @@ router.get('/dashboard', async (req, res) => {
 });
 
 // ---------- AUCTION MANAGEMENT ----------
-router.get('/auctions', async (req, res) => {
+router.get('/auctions', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -61,7 +61,7 @@ router.get('/auctions', async (req, res) => {
   }
 });
 
-router.get('/auctions/:id', async (req, res) => {
+router.get('/auctions/:id', async (req, res, next) => {
   try {
     const auction = await Auction.findOne({ _id: req.params.id, client: req.user._id }).populate('category', 'name slug');
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
@@ -76,7 +76,7 @@ router.post('/auctions', [
   body('description').notEmpty().withMessage('Description is required'),
   body('startTime').notEmpty().withMessage('Start time is required'),
   body('endTime').notEmpty().withMessage('End time is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const auction = await Auction.create({ ...req.body, client: req.user._id });
     res.status(201).json({ success: true, data: auction });
@@ -89,7 +89,7 @@ router.put('/auctions/:id', [
   body('title').optional().trim().notEmpty().withMessage('Title cannot be empty'),
   body('startTime').optional().isISO8601().withMessage('Valid start time is required'),
   body('endTime').optional().isISO8601().withMessage('Valid end time is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const auction = await Auction.findOneAndUpdate(
       { _id: req.params.id, client: req.user._id },
@@ -103,7 +103,7 @@ router.put('/auctions/:id', [
   }
 });
 
-router.put('/auctions/:id/publish', async (req, res) => {
+router.put('/auctions/:id/publish', async (req, res, next) => {
   try {
     const auction = await Auction.findOne({ _id: req.params.id, client: req.user._id });
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
@@ -122,7 +122,7 @@ router.put('/auctions/:id/publish', async (req, res) => {
   }
 });
 
-router.put('/auctions/:id/unpublish', async (req, res) => {
+router.put('/auctions/:id/unpublish', async (req, res, next) => {
   try {
     const auction = await Auction.findOneAndUpdate(
       { _id: req.params.id, client: req.user._id },
@@ -136,7 +136,7 @@ router.put('/auctions/:id/unpublish', async (req, res) => {
 });
 
 // ---------- LOT MANAGEMENT ----------
-router.get('/auctions/:auctionId/lots', async (req, res) => {
+router.get('/auctions/:auctionId/lots', async (req, res, next) => {
   try {
     const auction = await Auction.findOne({ _id: req.params.auctionId, client: req.user._id });
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
@@ -155,7 +155,7 @@ router.post('/auctions/:auctionId/lots', [
   body('title').notEmpty(),
   body('description').notEmpty(),
   body('startingBid').isFloat({ min: 0 }),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const auction = await Auction.findOne({ _id: req.params.auctionId, client: req.user._id });
     if (!auction) return res.status(404).json({ success: false, error: 'Auction not found' });
@@ -185,7 +185,7 @@ router.put('/lots/:id', [
   body('startingBid').optional().isFloat({ min: 0 }).withMessage('Starting bid cannot be negative'),
   body('estimateLow').optional().isFloat({ min: 0 }).withMessage('Estimate cannot be negative'),
   body('estimateHigh').optional().isFloat({ min: 0 }).withMessage('Estimate cannot be negative'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const lot = await Lot.findOneAndUpdate(
       { _id: req.params.id, client: req.user._id },
@@ -199,7 +199,7 @@ router.put('/lots/:id', [
   }
 });
 
-router.delete('/lots/:id', async (req, res) => {
+router.delete('/lots/:id', async (req, res, next) => {
   try {
     const lot = await Lot.findOne({ _id: req.params.id, client: req.user._id });
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
@@ -218,7 +218,7 @@ router.delete('/lots/:id', async (req, res) => {
 });
 
 // Upload lot images
-router.post('/lots/:id/images', upload.array('images', 10), async (req, res) => {
+router.post('/lots/:id/images', upload.array('images', 10), async (req, res, next) => {
   try {
     const lot = await Lot.findOne({ _id: req.params.id, client: req.user._id });
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
@@ -239,7 +239,7 @@ router.post('/lots/:id/images', upload.array('images', 10), async (req, res) => 
 });
 
 // Answer question on lot
-router.put('/lots/:lotId/questions/:questionId/answer', async (req, res) => {
+router.put('/lots/:lotId/questions/:questionId/answer', async (req, res, next) => {
   try {
     const lot = await Lot.findOne({ _id: req.params.lotId, client: req.user._id });
     if (!lot) return res.status(404).json({ success: false, error: 'Lot not found' });
@@ -258,7 +258,7 @@ router.put('/lots/:lotId/questions/:questionId/answer', async (req, res) => {
 });
 
 // ---------- ORDERS ----------
-router.get('/orders', async (req, res) => {
+router.get('/orders', async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -281,7 +281,7 @@ router.get('/orders', async (req, res) => {
   }
 });
 
-router.put('/orders/:id', async (req, res) => {
+router.put('/orders/:id', async (req, res, next) => {
   try {
     const { shippingStatus, trackingNumber, trackingUrl } = req.body;
     const update = {};
@@ -319,7 +319,7 @@ router.put('/orders/:id', async (req, res) => {
 });
 
 // ---------- REPORTS ----------
-router.get('/reports', async (req, res) => {
+router.get('/reports', async (req, res, next) => {
   try {
     const clientId = req.user._id;
 
@@ -355,7 +355,7 @@ router.get('/reports', async (req, res) => {
 });
 
 // ---------- CLIENT PROFILE ----------
-router.put('/profile', async (req, res) => {
+router.put('/profile', async (req, res, next) => {
   try {
     const { companyName, companyDescription, companyWebsite } = req.body;
     const user = await User.findByIdAndUpdate(req.user._id, { companyName, companyDescription, companyWebsite }, { new: true });
@@ -365,7 +365,7 @@ router.put('/profile', async (req, res) => {
   }
 });
 
-router.put('/bank-details', async (req, res) => {
+router.put('/bank-details', async (req, res, next) => {
   try {
     const user = await User.findByIdAndUpdate(req.user._id, { bankDetails: req.body }, { new: true });
     res.json({ success: true, data: user.bankDetails });

@@ -13,7 +13,7 @@ router.post('/register', [
   body('lastName').trim().notEmpty().withMessage('Last name is required'),
   body('email').trim().isEmail().withMessage('Valid email is required'),
   body('password').trim().isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const { firstName, lastName, email, password, phone, role } = req.body;
 
@@ -66,7 +66,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').trim().isEmail().withMessage('Valid email is required'),
   body('password').trim().notEmpty().withMessage('Password is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const { email, password } = req.body;
     const user = await User.findOne({ email }).select('+password');
@@ -136,13 +136,13 @@ router.post('/logout', (req, res) => {
 });
 
 // Get current user
-router.get('/me', protect, async (req, res) => {
+router.get('/me', protect, async (req, res, next) => {
   const user = await User.findById(req.user._id);
   res.json({ success: true, data: user });
 });
 
 // Verify email
-router.get('/verify-email/:token', async (req, res) => {
+router.get('/verify-email/:token', async (req, res, next) => {
   try {
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
     const user = await User.findOne({
@@ -168,7 +168,7 @@ router.get('/verify-email/:token', async (req, res) => {
 // Forgot password
 router.post('/forgot-password', [
   body('email').isEmail().withMessage('Valid email is required'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const user = await User.findOne({ email: req.body.email });
     if (!user) {
@@ -199,7 +199,7 @@ router.post('/forgot-password', [
 // Reset password
 router.put('/reset-password/:token', [
   body('password').isLength({ min: 8 }).withMessage('Password must be at least 8 characters'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const hashedToken = crypto.createHash('sha256').update(req.params.token).digest('hex');
     const user = await User.findOne({

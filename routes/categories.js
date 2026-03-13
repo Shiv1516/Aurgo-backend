@@ -3,7 +3,7 @@ const router = express.Router();
 const Category = require('../models/Category');
 
 // Get all categories
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const categories = await Category.find({ isActive: true })
       .sort('displayOrder name')
@@ -15,7 +15,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get category by slug
-router.get('/:slug', async (req, res) => {
+router.get('/:slug', async (req, res, next) => {
   try {
     const category = await Category.findOne({ slug: req.params.slug, isActive: true })
       .populate('subcategories');

@@ -13,7 +13,7 @@ const { processAutoBids } = require('../sockets/bidding');
 router.post('/', protect, [
   body('lotId').notEmpty().withMessage('Lot ID is required').isMongoId().withMessage('Invalid Lot ID format'),
   body('amount').isFloat({ min: 0.01 }).withMessage('Bid amount must be a positive number'),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const { lotId, amount, maxAutoBid } = req.body;
     const io = req.app.get('io');
@@ -104,7 +104,7 @@ router.post('/', protect, [
 });
 
 // Get user's bids
-router.get('/my-bids', protect, async (req, res) => {
+router.get('/my-bids', protect, async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -132,7 +132,7 @@ router.get('/my-bids', protect, async (req, res) => {
 });
 
 // Get active bids
-router.get('/active', protect, async (req, res) => {
+router.get('/active', protect, async (req, res, next) => {
   try {
     const bids = await Bid.find({ bidder: req.user._id, status: { $in: ['active', 'winning'] } })
       .sort({ timestamp: -1 })
@@ -149,7 +149,7 @@ router.get('/active', protect, async (req, res) => {
 router.post('/auto-bid', protect, [
   body('lotId').notEmpty(),
   body('maxAmount').isFloat({ min: 0 }),
-], validate, async (req, res) => {
+], validate, async (req, res, next) => {
   try {
     const { lotId, maxAmount } = req.body;
     const lot = await Lot.findById(lotId);

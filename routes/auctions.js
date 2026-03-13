@@ -6,7 +6,7 @@ const Lot = require('../models/Lot');
 const APIFeatures = require('../utils/apiFeatures');
 
 // Get all public auctions
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     let query = Auction.find({ isPublished: true })
       .populate('category', 'name slug')
@@ -54,7 +54,7 @@ router.get('/', async (req, res) => {
 });
 
 // Get featured auctions
-router.get('/featured', async (req, res) => {
+router.get('/featured', async (req, res, next) => {
   try {
     const auctions = await Auction.find({
       isPublished: true,
@@ -73,7 +73,7 @@ router.get('/featured', async (req, res) => {
 });
 
 // Get auction by slug
-router.get('/:slug', optionalAuth, async (req, res) => {
+router.get('/:slug', optionalAuth, async (req, res, next) => {
   try {
     const auction = await Auction.findOne({ slug: req.params.slug })
       .populate('category', 'name slug')
@@ -97,7 +97,7 @@ router.get('/:slug', optionalAuth, async (req, res) => {
 });
 
 // Get auctions by category
-router.get('/category/:categorySlug', async (req, res) => {
+router.get('/category/:categorySlug', async (req, res, next) => {
   try {
     const Category = require('../models/Category');
     const category = await Category.findOne({ slug: req.params.categorySlug });

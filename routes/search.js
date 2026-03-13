@@ -4,7 +4,7 @@ const Auction = require('../models/Auction');
 const Lot = require('../models/Lot');
 
 // Global search
-router.get('/', async (req, res) => {
+router.get('/', async (req, res, next) => {
   try {
     const { q, type, category, minPrice, maxPrice, status, sort } = req.query;
     const page = parseInt(req.query.page) || 1;

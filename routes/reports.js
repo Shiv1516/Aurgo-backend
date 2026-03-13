@@ -8,7 +8,7 @@ const Bid = require('../models/Bid');
 const User = require('../models/User');
 
 // Get reports (admin/client)
-router.get('/', protect, authorize('admin', 'superadmin', 'client', 'client_manager'), async (req, res) => {
+router.get('/', protect, authorize('admin', 'superadmin', 'client', 'client_manager'), async (req, res, next) => {
   try {
     const { type, startDate, endDate } = req.query;
     const isAdmin = ['admin', 'superadmin'].includes(req.user.role);

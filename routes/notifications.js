@@ -4,7 +4,7 @@ const { protect } = require('../middleware/auth');
 const Notification = require('../models/Notification');
 
 // Get user notifications
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 20;
@@ -30,7 +30,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // Get unread count
-router.get('/unread-count', protect, async (req, res) => {
+router.get('/unread-count', protect, async (req, res, next) => {
   try {
     const count = await Notification.countDocuments({ recipient: req.user._id, isRead: false });
     res.json({ success: true, count });
@@ -40,7 +40,7 @@ router.get('/unread-count', protect, async (req, res) => {
 });
 
 // Mark as read
-router.put('/:id/read', protect, async (req, res) => {
+router.put('/:id/read', protect, async (req, res, next) => {
   try {
     const notification = await Notification.findOneAndUpdate(
       { _id: req.params.id, recipient: req.user._id },
@@ -55,7 +55,7 @@ router.put('/:id/read', protect, async (req, res) => {
 });
 
 // Mark all as read
-router.put('/read-all', protect, async (req, res) => {
+router.put('/read-all', protect, async (req, res, next) => {
   try {
     await Notification.updateMany(
       { recipient: req.user._id, isRead: false },
@@ -68,7 +68,7 @@ router.put('/read-all', protect, async (req, res) => {
 });
 
 // Delete notification
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, async (req, res, next) => {
   try {
     await Notification.findOneAndDelete({ _id: req.params.id, recipient: req.user._id });
     res.json({ success: true, message: 'Notification deleted' });

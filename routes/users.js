@@ -31,7 +31,7 @@ router.put(
   },
 );
 
-router.put("/avatar", protect, upload.single("avatar"), async (req, res) => {
+router.put("/avatar", protect, upload.single("avatar"), async (req, res, next) => {
   try {
     if (!req.file)
       return res
@@ -76,7 +76,7 @@ router.post(
   },
 );
 
-router.put("/addresses/:id", protect, async (req, res) => {
+router.put("/addresses/:id", protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     const address = user.addresses.id(req.params.id);
@@ -98,7 +98,7 @@ router.put("/addresses/:id", protect, async (req, res) => {
   }
 });
 
-router.delete("/addresses/:id", protect, async (req, res) => {
+router.delete("/addresses/:id", protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     user.addresses.pull(req.params.id);
@@ -185,7 +185,7 @@ router.put(
   },
 );
 
-router.post("/saved-searches", protect, async (req, res) => {
+router.post("/saved-searches", protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     user.savedSearches.push({ name: req.body.name, filters: req.body.filters });
@@ -196,7 +196,7 @@ router.post("/saved-searches", protect, async (req, res) => {
   }
 });
 
-router.delete("/saved-searches/:id", protect, async (req, res) => {
+router.delete("/saved-searches/:id", protect, async (req, res, next) => {
   try {
     const user = await User.findById(req.user._id);
     user.savedSearches.pull(req.params.id);

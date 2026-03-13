@@ -3,7 +3,7 @@ const router = express.Router();
 const Page = require('../models/Page');
 
 // Get page by slug
-router.get('/:slug', async (req, res) => {
+router.get('/:slug', async (req, res, next) => {
   try {
     const page = await Page.findOne({ slug: req.params.slug, isPublished: true });
     if (!page) return res.status(404).json({ success: false, error: 'Page not found' });

@@ -5,7 +5,7 @@ const Watchlist = require('../models/Watchlist');
 const Auction = require('../models/Auction');
 
 // Get user watchlist
-router.get('/', protect, async (req, res) => {
+router.get('/', protect, async (req, res, next) => {
   try {
     const watchlist = await Watchlist.find({ user: req.user._id })
       .populate({
@@ -26,7 +26,7 @@ router.get('/', protect, async (req, res) => {
 });
 
 // Add to watchlist
-router.post('/', protect, async (req, res) => {
+router.post('/', protect, async (req, res, next) => {
   try {
     const { auctionId, lotId } = req.body;
 
@@ -58,7 +58,7 @@ router.post('/', protect, async (req, res) => {
 });
 
 // Check if in watchlist
-router.get('/check/:auctionId', protect, async (req, res) => {
+router.get('/check/:auctionId', protect, async (req, res, next) => {
   try {
     const item = await Watchlist.findOne({
       user: req.user._id,
@@ -71,7 +71,7 @@ router.get('/check/:auctionId', protect, async (req, res) => {
 });
 
 // Remove from watchlist
-router.delete('/:id', protect, async (req, res) => {
+router.delete('/:id', protect, async (req, res, next) => {
   try {
     const item = await Watchlist.findOneAndDelete({ _id: req.params.id, user: req.user._id });
     if (!item) return res.status(404).json({ success: false, error: 'Not found' });
