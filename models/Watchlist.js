@@ -10,7 +10,7 @@ const watchlistSchema = new mongoose.Schema({
   timestamps: true,
 });
 
-watchlistSchema.index({ user: 1, auction: 1 }, { unique: true, sparse: true });
-watchlistSchema.index({ user: 1, lot: 1 }, { unique: true, sparse: true });
+watchlistSchema.index({ user: 1, auction: 1 }, { unique: true, partialFilterExpression: { auction: { $exists: true } } });
+watchlistSchema.index({ user: 1, lot: 1 }, { unique: true, partialFilterExpression: { lot: { $exists: true } } });
 
 module.exports = mongoose.model('Watchlist', watchlistSchema);

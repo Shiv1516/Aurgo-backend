@@ -40,11 +40,11 @@ router.post('/', protect, async (req, res) => {
       return res.status(400).json({ success: false, error: 'Already in watchlist' });
     }
 
-    const watchItem = await Watchlist.create({
-      user: req.user._id,
-      auction: auctionId,
-      lot: lotId,
-    });
+    const payload = { user: req.user._id };
+    if (auctionId) payload.auction = auctionId;
+    if (lotId) payload.lot = lotId;
+
+    const watchItem = await Watchlist.create(payload);
 
     // Update watch count
     if (auctionId) {
