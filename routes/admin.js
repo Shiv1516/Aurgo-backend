@@ -91,10 +91,35 @@ router.get('/users/:id', async (req, res, next) => {
 
 router.put('/users/:id', async (req, res, next) => {
   try {
-    const { role, isActive, commissionRate } = req.body;
-    const user = await User.findByIdAndUpdate(req.params.id, { role, isActive, commissionRate }, { new: true });
+    const { role, isActive, commissionRate, firstName, lastName, email, phone, companyName, clientApproved } = req.body;
+    
+    // Build update object dynamically to only update provided fields
+    const updateFields = {};
+    if (role !== undefined) updateFields.role = role;
+    if (isActive !== undefined) updateFields.isActive = isActive;
+    if (commissionRate !== undefined) updateFields.commissionRate = commissionRate;
+    if (firstName !== undefined) updateFields.firstName = firstName;
+    if (lastName !== undefined) updateFields.lastName = lastName;
+    if (email !== undefined) updateFields.email = email;
+    if (phone !== undefined) updateFields.phone = phone;
+    if (companyName !== undefined) updateFields.companyName = companyName;
+    if (clientApproved !== undefined) updateFields.clientApproved = clientApproved;
+
+    const user = await User.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     await ActivityLog.create({ user: req.user._id, action: 'update_user', resource: 'User', resourceId: user._id, details: req.body, ipAddress: req.ip });
     res.json({ success: true, data: user });
+  } catch (error) {
+    next(error);
+  }
+});
+
+router.delete('/users/:id', async (req, res, next) => {
+  try {
+    const user = await User.findByIdAndDelete(req.params.id);
+    if (!user) return res.status(404).json({ success: false, error: 'User not found' });
+    
+    await ActivityLog.create({ user: req.user._id, action: 'delete_user', resource: 'User', resourceId: req.params.id, ipAddress: req.ip });
+    res.json({ success: true, message: 'User deleted successfully' });
   } catch (error) {
     next(error);
   }
